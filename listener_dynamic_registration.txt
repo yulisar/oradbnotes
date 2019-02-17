@@ -1,1 +1,126 @@
 
+http://neeraj-dba.blogspot.com/2011/10/how-to-register-listener-in-database.html
+
+
+
+
+Let's have a Demo of Dynamic Listener.
+
+The listener is quite capable of running without a listner.ora file at all. It will simply start and run with all default values.Here i have rename the listener.ora file and stop and start the listener and find that listener supports no services.Check the below: 
+
+LSNRCTL> stop
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=tech-199)(PORT=1521)))
+The command completed successfully.
+
+Now start the listener
+
+LSNRCTL> start
+Starting tnslsnr: please wait...
+
+TNSLSNR for 32-bit Windows: Version 11.2.0.1.0 - Production
+Log messages written to c:\app\neerajs\diag\tnslsnr\tech-199\listener\alert\log.xml
+Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=tech-199)(PORT=1521)))
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=tech-199)(PORT=1521)))
+STATUS of the LISTENER
+------------------------
+Alias                     LISTENER
+Version                   TNSLSNR for 32-bit Windows: Version 11.2.0.1.0 - Production
+Start Date                05-OCT-2011 16:21:30
+Uptime                    0 days 0 hr. 0 min. 7 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Log File         c:\app\neerajs\diag\tnslsnr\tech-199\listener\alert\log.xml
+Listening Endpoints Summary...
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=tech-199)(PORT=1521)))
+The listener supports no services
+The command completed successfully
+
+Here, we find that listener donot support any services.Since it doesnot found the listener.ora file ,and  if we try to connect to the Instance then it will  throws the error i.e, ORA-12514 :
+
+C:\> tnsping noida
+TNS Ping Utility for 32-bit Windows: Version 11.2.0.1.0 - Production on 05-OCT-2011 16:23:03
+Copyright (c) 1997, 2010, Oracle.  All rights reserved.
+Used parameter files:
+C:\app\neerajs\product\11.2.0\dbhome_1\network\admin\sqlnet.ora
+
+Used TNSNAMES adapter to resolve the alias
+Attempting to contact (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 192.100.0.112)(PORT = 1521))) (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = noida)))
+OK (40 msec)
+
+Now, we try to connect with Instance "NOIDA"
+
+C:\> sqlplus sys/xxxx@noida as sysdba
+
+SQL*Plus: Release 11.2.0.1.0 Production on Wed Oct 5 16:23:45 2011
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+ERROR:
+ORA-12514: TNS:listener does not currently know of service requested in connect
+descriptor
+
+Since the tnsping proves that our tnsnames.ora resolution is correct, but it throws the error while connecting to database because the listener doesnot knows anything about the services "NOIDA" . Let's start the instance and check again : 
+
+C:\> set ORACLE_SID=noida
+SQL> startup 
+ORACLE instance started.
+
+Total System Global Area  263639040 bytes
+Fixed Size                  1373964 bytes
+Variable Size             222300404 bytes
+Database Buffers           33554432 bytes
+Redo Buffers                6410240 bytes
+Database mounted.
+Database opened.
+
+Now check the listener status again :
+
+LSNRCTL> status
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=tech-199)(PORT=1521)))
+STATUS of the LISTENER
+------------------------
+Alias                     LISTENER
+Version                   TNSLSNR for 32-bit Windows: Version 11.2.0.1.0 - Production
+Start Date                05-OCT-2011 16:21:30
+Uptime                    0 days 0 hr. 19 min. 21 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Log File         c:\app\neerajs\diag\tnslsnr\tech-199\listener\alert\log.xml
+Listening Endpoints Summary...
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=tech-199)(PORT=1521)))
+Services Summary...
+Service "noida.TECH-199" has 1 instance(s).
+  Instance "noida", status READY, has 1 handler(s) for this service...
+Service "noidaXDB.TECH-199" has 1 instance(s).
+  Instance "noida", status READY, has 1 handler(s) for this service...
+Service "noida_DGB.TECH-199" has 1 instance(s).
+  Instance "noida", status READY, has 1 handler(s) for this service...
+The command completed successfully
+
+Here we observe that once the instance is started , when we re-check the listener now knows of service “NOIDA”, with a status of READY . This obviously did not come from listener.ora as the file is renamed. Notice also that, unlike the static registration, this time the status is READY. The listener knows the instance is ready because the instance itself told the listener it was ready. 
+
+Now agian connecting to the Instance :
+
+C:\>sqlplus sys/xxxx@noida as sysdba
+SQL*Plus: Release 11.2.0.1.0 Production on Tue Oct 4 18:14:28 2011
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+SQL>
+
+Here by default, the PMON process registers service information with its local listener on the default local address of TCP/IP, port 1521. As long as the listener configuration is synchronized with the database configuration, PMON can register service information with a nondefault local listener or a remote listener on another node. During service registration PMON provides listener with the following information: 
+
+- Name of the associated instance
+- Current load and maximum load on instance
+- Names of DB services provided by database.
+- Information about dedicated servers and dispatchers (depends on database server mode i.e dedicated/shared server mode) .
+
+PMON process wakes up at every 60 seconds and provide information to the listener. If any problem arises and PMON process fails then it's not possible to register information to listener periodically. In this case we can do 'Manual service registration' using command: 
+SQL> ALTER SYSTEM REGISTER; 
+
+
+
+
+https://docs.oracle.com/cd/B13789_01/network.101/b10775/listenercfg.htm
+
