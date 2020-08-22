@@ -1,0 +1,39 @@
+say we have the following startup parameter files:
+
+orclb.__data_transfer_cache_size=0
+orclb.__db_cache_size=79691776
+orclb.__inmemory_ext_roarea=0
+orclb.__inmemory_ext_rwarea=0
+orclb.__java_pool_size=4194304
+orclb.__large_pool_size=8388608
+orclb.__oracle_base='C:\appme\db\oracle'#ORACLE_BASE set from environment
+orclb.__pga_aggregate_target=0
+orclb.__sga_target=268435456
+orclb.__shared_io_pool_size=8388608
+orclb.__shared_pool_size=150994944
+orclb.__streams_pool_size=0
+*.audit_file_dest='c:\appme\db\oracle\admin\orclb\adump'
+*.audit_trail='db'
+*.compatible='12.2.0'
+*.control_files='D:\ORADATA\ORCLB\CONTROLFILE\O1_MF_G6KZKPFG_.CTL','D:\ORADATA\FRA\ORCLB\ORCLB\CONTROLFILE\O1_MF_G6KZKPGG_.CTL'
+*.db_block_size=8192
+*.db_create_file_dest='D:\oradata'
+*.db_name='orclb'
+*.db_recovery_file_dest='d:\oradata\FRA\orclb'
+*.db_recovery_file_dest_size=9546m
+*.diagnostic_dest='C:\appme\db\oracle'
+*.dispatchers='(PROTOCOL=TCP) (SERVICE=orclbXDB)'
+*.open_cursors=50
+*.parallel_max_servers=0
+*.pga_aggregate_target=0
+*.processes=50
+*.remote_login_passwordfile='EXCLUSIVE'
+*.sga_target=256m
+*.undo_tablespace='UNDOTBS1'
+
+then make sure that : the following dir is accessible by user the own the database service.
+Check it at :  Services--> right click The oracle service --> logon tab
+
+orclb.__oracle_base='C:\appme\db\oracle'#ORACLE_BASE set from environment
+*.audit_file_dest='c:\appme\db\oracle\admin\orclb\adump'
+*.diagnostic_dest='C:\appme\db\oracle'
