@@ -8,8 +8,31 @@ ORA-12516, TNS:listener could not find available handler with matching protocol 
 	at oracle.jdbc.driver.T4CConnection.connect(T4CConnection.java:1360)
 	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:486)
 	... 51 more
-  
-  
+
+Solution:
+
+SQL> alter system set sga_max_size = 512M scope=spfile;
+
+System altered.
+
+SQL> alter system set sga_target = 512M scope=spfile;
+
+System altered.
+
+SQL> alter system set processes=500 scope=spfile;
+
+System altered.
+
+SQL> alter system set sessions=300 scope=spfile;
+
+System altered.
+
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+SQL> startup
   
   
   
