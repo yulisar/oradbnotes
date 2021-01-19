@@ -33,6 +33,19 @@ Database dismounted.
 ORACLE instance shut down.
 
 SQL> startup
-  
+
+
+Query for checking:
+
+SELECT COUNT(*)
+  FROM v$session
+WHERE STATUS = 'ACTIVE';
+
+SELECT name, value 
+  FROM v$parameter
+ WHERE name = 'sessions';
+ 
+ 
+ 
   
   
